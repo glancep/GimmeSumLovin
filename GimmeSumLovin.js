@@ -196,8 +196,8 @@ class Game {
         for (let i = 0; i < this.state.gridSize; i++) {
             let rowSum = 0, colSum = 0;
             for (let j = 0; j < this.state.gridSize; j++) {
-                rowSum += this.state.solveMap[i][j] ? this.state.numbers[i][j] : 0;
-                colSum += this.state.solveMap[j][i] ? this.state.numbers[j][i] : 0;
+                rowSum += this.state.solveMap[i][j] && !this.state.decoyMap[i][j] ? this.state.numbers[i][j] : 0;
+                colSum += this.state.solveMap[j][i] && !this.state.decoyMap[j][i] ? this.state.numbers[j][i] : 0;
                 unsolved = unsolved || !this.state.solveMap[i][j];
             }
 
