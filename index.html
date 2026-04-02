@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GimmeSumLovin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0 1rem;
+            font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+            font-size: 1rem;
+            line-height: 1.5;
+            background: #fcc;
+            transition: background 0.3s;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.4);
+            align-items: center;
+            justify-content: center;
+        }
+        .overlay-content {
+            background: #fff;
+            border-radius: 12px;
+            padding: 2em 2em;
+            text-align: center;
+            max-width: 90vw;
+            margin: auto;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+        }
+        body.pencilMode {
+            background: #cfc;
+        }
+        .pencilMode #mode-btn::before {
+            content: "✏️";
+        }
+        #mode-btn::before {
+            content: "🗑️";
+        }
+        h1 {
+            font-size: 2rem;
+            margin: 0.5rem;
+            text-align: center;
+        }
+        .controls {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        #game-grid {
+            display: grid;
+            gap: 4px;
+            width: min(90vw, 90vh);
+            height: min(90vw, 90vh);
+            max-width: 98vw;
+            max-height: 80vh;
+            margin: 1rem auto;
+            background: #f0e6d2;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .grid-cell, .sum-cell, .empty-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1 / 1;
+            min-width: 0;
+            min-height: 0;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .grid-cell {
+            background: #fed;
+            border-radius: 4px;
+            font-size: 1.3rem;
+            font-weight: 100;
+            color: #333;
+            user-select: none;
+            transition: color 0.3s, background 0.3s;
+        }
+        .sum-cell {
+            background: #ffe082;
+            color: rgba(128, 100, 0, 0.5);
+            font-weight: 999;
+            border-radius: 4px;
+            font-size: 1.5rem;
+            user-select: none;
+        }
+        .empty-cell {
+            background: transparent;
+            box-shadow: none;
+        }
+        .grid-cell.solved {
+            background: #b2f2bb !important;
+            color: #155724 !important;
+        }
+        .grid-cell.solved.decoy {
+            background: #f8bbd0;
+            color: transparent !important;
+        }
+        .grid-cell.decoy {
+            background: #f8bbd0;
+            color: #a00040;
+        }
+        .grid-cell.flash-wrong {
+            background: #ff5252 !important;
+            color: #fff !important;
+            transition: background 0.2s;
+        }
+        .current-sum {
+            position: absolute;
+            top: -2px;
+            right: 0px;
+            font-size: 0.6em;
+            color: #000;
+            font-weight: 800;
+            font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+            opacity: 0.75;
+            letter-spacing: 0.01em;
+        }
+        body:not(.disable-current-sums) .sum-cell .number {
+            position: absolute;
+            top: 4px;
+        }
+        body.disable-current-sums .current-sum {
+            display: none;
+        }
+        @media (max-width: 600px), (max-height: 600px) {
+            #game-grid {
+                width: min(90vw, 70vh);
+                height: min(90vw, 70vh);
+                max-width: 90vw;
+                max-height: 70vh;
+            }
+            .grid-cell {
+                font-size: 1.5rem;
+            }
+            .sum-cell {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Gimme Sum Lovin</h1>
+    <div class="controls">
+        <button id="mode-btn" class="btn"></button>
+        <button id="settings-btn" class="btn">⚙️</button>
+        <button id="reset-btn" class="btn">♻️</button>
+        <div id="lives">❤️❤️❤️</div>
+    </div>
+    <div id="game-grid"></div>
+    <div style="height: 10em;"></div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="GimmeSumLovin.js"></script>
+    <div id="settings-popup" class="overlay" style="z-index: 1000;">
+        <div class="overlay-content">
+            <h1>Settings</h1>
+            <label>
+                <input type="checkbox" id="show-current-sums" checked>
+                Show current sums
+            </label><br>
+            <label>
+                <input type="checkbox" id="static-grid-size">
+                Static Grid Size
+            </label><br>
+            <label id="static-grid-size-lbl" style="display:none;">
+                <input type="range" id="static-grid-size-slider" min="1" max="12" value="7">
+                <span id="static-grid-size-value">7</span>
+            </label><br>
+            <label>
+                <input type="checkbox" id="static-difficulty">
+                Static Difficulty
+            </label><br>
+            <label id="static-difficulty-lbl" style="display:none;">
+                <input type="range" id="static-difficulty-slider" min="1" max="10" value="3">
+                <span id="static-difficulty-value">3</span>
+            </label><br>
+            <input id="seed-input" />
+            <br>
+            <button id="copy-seed-btn" class="btn">Copy</button>
+            <button id="apply-seed-btn" class="btn">Apply</button>
+            <button id="randomize-seed-btn" class="btn">Randomize</button>
+            <button id="close-settings-btn" class="btn">Close</button>
+        </div>
+    </div>
+</body>
+</html>
