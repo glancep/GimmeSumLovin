@@ -110,6 +110,12 @@ class Game {
             }
         });
 
+        // Win
+        $('#close-win-btn').click(() => {
+            $('#win-popup').fadeOut(200);
+            this.newGame();
+        });
+
         // Settings
         $('#settings-btn').click(() => {
             $('#settings-popup').fadeIn(200);
@@ -171,11 +177,13 @@ class Game {
     }
 
     updateCurrentSums = function() {
+        let unsolved = false;
         for (let i = 0; i < this.state.gridSize; i++) {
             let rowSum = 0, colSum = 0;
             for (let j = 0; j < this.state.gridSize; j++) {
                 rowSum += this.state.solveMap[i][j] ? this.state.numbers[i][j] : 0;
                 colSum += this.state.solveMap[j][i] ? this.state.numbers[j][i] : 0;
+                unsolved = unsolved || !this.state.solveMap[i][j];
             }
 
             const $rowSum = $(`.sum-cell.row-${i} .current-sum`);
@@ -183,6 +191,8 @@ class Game {
             const $colSum = $(`.sum-cell.col-${i} .current-sum`);
             $colSum.text(colSum);
         }
+
+        if (!unsolved) $('#win-popup').fadeIn(200);
     }
 
     renderGrid = function() {

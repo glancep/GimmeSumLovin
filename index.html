@@ -103,10 +103,12 @@
             background: #f8bbd0;
             color: transparent !important;
         }
+        /*
         .grid-cell.decoy {
             background: #f8bbd0;
             color: #a00040;
         }
+        */
         .grid-cell.flash-wrong {
             background: #ff5252 !important;
             color: #fff !important;
@@ -158,6 +160,12 @@
     <div style="height: 10em;"></div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="GimmeSumLovin.js"></script>
+    <div id="win-popup" class="overlay" style="z-index: 1000;">
+        <div class="overlay-content">
+            <h1>Congratulations!</h1>
+            <button id="close-win-btn" class="btn">Restart</button>
+        </div>
+    </div>
     <div id="settings-popup" class="overlay" style="z-index: 1000;">
         <div class="overlay-content">
             <h1>Settings</h1>
