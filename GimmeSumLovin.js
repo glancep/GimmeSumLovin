@@ -83,6 +83,15 @@ class Game {
         this.updateLives();
     }
 
+    resetGame = function() {
+        this.state.solveMap = this.getSolveMap();
+        this.state.lives = this.state.maxLives;
+        this.saveState();
+
+        this.renderGrid();
+        this.updateLives();
+    }
+
     updateLives = function(value) {
         if (typeof value === "number") this.state.lives += value;
 
@@ -94,6 +103,7 @@ class Game {
         console.info(`Lives: ${this.state.lives}`);
 
         if (this.state.lives <= 0) {
+            $('#lose-popup').fadeIn(200);
         }
     }
 
@@ -114,6 +124,11 @@ class Game {
         $('#close-win-btn').click(() => {
             $('#win-popup').fadeOut(200);
             this.newGame();
+        });
+        // Lose
+        $('#close-lose-btn').click(() => {
+            $('#lose-popup').fadeOut(200);
+            this.resetGame();
         });
 
         // Settings
