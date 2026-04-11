@@ -77,30 +77,53 @@
         .grid-cell {
             background: #fed;
             border-radius: 4px;
-            font-size: 1.3rem;
-            font-weight: 100;
+            font-weight: 999;
+            font-size: 1.5rem;
             color: #333;
             user-select: none;
             transition: color 0.3s, background 0.3s;
         }
+        .grid-cell.group1 {
+            background: #bbf;
+        }
+        .grid-cell.group2 {
+            background: #bff;
+        }
+        .grid-cell.group3 {
+            background: #ffb;
+        }
+        .grid-cell.group4 {
+            background: #f8b;
+        }
+        .grid-cell.group5 {
+            background: #b8f;
+        }
+        .grid-cell.group6 {
+            background: #8b8;
+        }
+        .grid-cell.group7 {
+            background: #f88;
+        }
+        .grid-cell.group8 {
+            background: #155724;
+        }
         .sum-cell {
             background: #ffe082;
             color: rgba(128, 100, 0, 0.5);
-            font-weight: 999;
             border-radius: 4px;
-            font-size: 1.5rem;
             user-select: none;
         }
         .empty-cell {
             background: transparent;
             box-shadow: none;
         }
-        .grid-cell.solved {
-            background: #b2f2bb !important;
-            color: #155724 !important;
+        .grid-cell.solved:not(.decoy) {
+            border: 1px solid #000 !important;
         }
-        .grid-cell.solved.decoy {
-            background: #f8bbd0;
+        .grid-cell.solved .number {
+            color: #090 !important;
+        }
+        .grid-cell.solved.decoy .number {
             color: transparent !important;
         }
         /*
@@ -125,7 +148,18 @@
             opacity: 0.75;
             letter-spacing: 0.01em;
         }
-        body:not(.disable-current-sums) .sum-cell .number {
+        .group-sum {
+            position: absolute;
+            top: -2px;
+            left: 0px;
+            font-size: 0.6em;
+            color: #000;
+            font-weight: 800;
+            font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+            opacity: 0.75;
+            letter-spacing: 0.01em;
+        }
+        .number {
             position: absolute;
             top: 4px;
         }
@@ -140,7 +174,7 @@
                 max-height: 70vh;
             }
             .grid-cell {
-                font-size: 1.5rem;
+                font-size: 1.2rem;
             }
             .sum-cell {
                 font-size: 1.2rem;
@@ -178,6 +212,10 @@
             <label>
                 <input type="checkbox" id="show-current-sums" checked>
                 Show current sums
+            </label><br>
+            <label>
+                <input type="checkbox" id="show-color-groups" checked>
+                Show color groups
             </label><br>
             <label>
                 <input type="checkbox" id="static-grid-size">
