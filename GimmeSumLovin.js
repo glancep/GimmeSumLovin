@@ -10,6 +10,14 @@ console.error = console.log;
 console.info = console.log;
 
 $(document).ready(function() {
+    $('#reset-state-btn').click(function() {
+        if (confirm("Are you sure you want to reset all saved state?")) {
+            localStorage.removeItem('state');
+            localStorage.removeItem('settings');
+            location.reload();
+        }
+    });
+
     const game = new Game();
 
     $('#reset-btn').click(function() {
