@@ -118,7 +118,7 @@
             box-shadow: none;
         }
         .grid-cell.solved:not(.decoy) {
-            border: 1px solid #000 !important;
+            background-image: radial-gradient(circle 1.5em at center, transparent 90%, black, transparent);
         }
         .grid-cell.solved .number {
             color: #090 !important;
@@ -138,6 +138,7 @@
             transition: background 0.2s;
         }
         .current-sum {
+            background: rgba(0,0,0,0.2);
             position: absolute;
             top: -2px;
             right: 0px;
@@ -149,6 +150,7 @@
             letter-spacing: 0.01em;
         }
         .group-sum {
+            background: rgba(0,0,0,0.2);
             position: absolute;
             top: -2px;
             left: 0px;
@@ -161,7 +163,6 @@
         }
         .number {
             position: absolute;
-            top: 4px;
         }
         body.disable-current-sums .current-sum {
             display: none;
@@ -175,6 +176,9 @@
             }
             .grid-cell {
                 font-size: 1.2rem;
+            }
+            .grid-cell.solved:not(.decoy) {
+                background-image: radial-gradient(circle 1em at center, transparent 90%, black, transparent);
             }
             .sum-cell {
                 font-size: 1.2rem;
