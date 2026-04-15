@@ -24,6 +24,7 @@ class Game {
             staticDifficulty: false,
             difficulty: 5,
             showSums: true,
+            showColorGroups: true,
             stdProbability: 0.25,
             sparseProbability: 0.75,
         };
@@ -33,6 +34,7 @@ class Game {
         this.saveSettings();
 
         $('#show-current-sums').prop('checked', this.settings.showSums);
+        $('#show-color-groups').prop('checked', this.settings.showColorGroups);
         $('body').toggleClass('disable-current-sums', !this.settings.showSums);
         $('#static-grid-size').prop('checked', this.settings.staticGridSize);
         $('#static-grid-size-slider').val(this.settings.gridSize);
@@ -58,7 +60,7 @@ class Game {
             this.renderGrid();
         }
 
-        $('body').toggleClass('pencilMode', this.state.pencilMode);
+        this.togglePencilMode(this.state.pencilMode);
     }
 
     saveState = function() {
@@ -69,16 +71,18 @@ class Game {
         this.loadSettings();
         this.state = {
             gridSize: parseInt(this.settings.gridSize),
-            pencilMode: true,
+            pencilMode: false,
             lives: 3,
             maxLives: 3,
         };
         this.state.numbers = this.getNumbers();
         this.state.decoyMap = this.getDecoyMap();
         this.state.solveMap = this.getSolveMap();
+        this.state.colorGroupMap = this.getColorGroupMap();
         this.generateSums();
         this.saveState();
 
+        this.togglePencilMode(this.state.pencilMode);
         this.renderGrid();
         this.updateLives();
     }
@@ -107,16 +111,25 @@ class Game {
         }
     }
 
+    togglePencilMode = function(newMode) {
+        if (typeof newMode === "boolean") {
+            this.state.pencilMode = newMode;
+        } else {
+            this.state.pencilMode = !this.state.pencilMode;
+        }
+        $('body').toggleClass('pencilMode', this.state.pencilMode);
+        this.saveState();
+        console.info(`Mode: ${this.state.pencilMode ? 'Pencil' : 'Eraser'}`);
+    }
+
+
     bindButtonEvents = function() {
         $('body').bind('click', (event) => {
             const $target = $(event.target);
 
             if ($target.is('#mode-btn') ||
                 (!$target.is('label') && !$target.is('input') && !$target.is('button'))) {
-                this.state.pencilMode = !this.state.pencilMode;
-                $('body').toggleClass('pencilMode', this.state.pencilMode);
-                this.saveState();
-                console.info(`Mode: ${this.state.pencilMode ? 'Pencil' : 'Eraser'}`);
+                this.togglePencilMode();
             }
         });
 
@@ -192,22 +205,57 @@ class Game {
     }
 
     updateCurrentSums = function() {
-        let unsolved = false;
-        for (let i = 0; i < this.state.gridSize; i++) {
-            let rowSum = 0, colSum = 0;
-            for (let j = 0; j < this.state.gridSize; j++) {
-                rowSum += this.state.solveMap[i][j] ? this.state.numbers[i][j] : 0;
-                colSum += this.state.solveMap[j][i] ? this.state.numbers[j][i] : 0;
-                unsolved = unsolved || !this.state.solveMap[i][j];
-            }
+        const rowCurSums = Array(this.state.gridSize).fill(0);
+        const rowSolvedState = Array(this.state.gridSize).fill(true);
+        const colCurSums = Array(this.state.gridSize).fill(0);
+        const colSolvedState = Array(this.state.gridSize).fill(true);
+        const groupCurSums = Array(this.state.gridSize + 1).fill(0);
+        const groupSolvedState = Array(this.state.gridSize + 1).fill(true);
+        let solved = true;
 
-            const $rowSum = $(`.sum-cell.row-${i} .current-sum`);
-            $rowSum.text(rowSum);
-            const $colSum = $(`.sum-cell.col-${i} .current-sum`);
-            $colSum.text(colSum);
+        for (let row = 0; row < this.state.gridSize; row++) {
+            for (let col = 0; col < this.state.gridSize; col++) {
+                const shouldCount = this.state.solveMap[row][col] && !this.state.decoyMap[row][col];
+                const value = this.state.numbers[row][col];
+                rowCurSums[row] += shouldCount ? value : 0;
+                rowSolvedState[row] = rowSolvedState[row] && this.state.solveMap[row][col];
+                colCurSums[col] += shouldCount ? value : 0;
+                colSolvedState[col] = colSolvedState[col] && this.state.solveMap[row][col];
+                groupCurSums[this.state.colorGroupMap[row][col]] += shouldCount ? value : 0;
+                groupSolvedState[this.state.colorGroupMap[row][col]] = groupSolvedState[this.state.colorGroupMap[row][col]] && this.state.solveMap[row][col];
+                solved = solved && this.state.solveMap[row][col];
+            }
         }
 
-        if (!unsolved) $('#win-popup').fadeIn(200);
+        for (let i = 0; i <= this.state.gridSize; i++) {
+            if (i < this.state.gridSize) {
+                const $rowSum = $(`.sum-cell.row-${i} .number`);
+                const $rowCurSum = $(`.sum-cell.row-${i} .current-sum`);
+                $rowCurSum.text(rowCurSums[i]);
+                if (rowSolvedState[i]) {
+                    $rowSum.fadeOut(200, () => $(this).remove());
+                    $rowCurSum.fadeOut(200, () => $(this).remove());
+                }
+
+                const $colSum = $(`.sum-cell.col-${i} .number`);
+                const $colCurSum = $(`.sum-cell.col-${i} .current-sum`);
+                $colCurSum.text(colCurSums[i]);
+                if (colSolvedState[i]) {
+                    $colSum.fadeOut(200, () => $(this).remove());
+                    $colCurSum.fadeOut(200, () => $(this).remove());
+                }
+            }
+
+            const $groupSum = $(`.grid-cell.group${i} .group-sum`);
+            const $groupCurSum = $(`.grid-cell.group${i} .current-sum`);
+            $groupCurSum.text(groupCurSums[i]);
+            if (groupSolvedState[i]) {
+                $groupSum.fadeOut(200, () => $(this).remove());
+                $groupCurSum.fadeOut(200, () => $(this).remove());
+            }
+        }
+
+        if (solved) $('#win-popup').fadeIn(200);
     }
 
     renderGrid = function() {
@@ -239,13 +287,20 @@ class Game {
                 } else {
                     const decoy = this.state.decoyMap[row - 1][col - 1] ? 'decoy' : '';
                     const solved = this.state.solveMap[row - 1][col - 1] ? 'solved' : '';
-                    // Add data attributes for row/col and decoy status
                     this.$grid.append(
-                        `<div class="grid-cell ${decoy} ${solved} row-${row - 1} col-${col - 1}" data-row="${row - 1}" data-col="${col - 1}">
+                        `<div class="grid-cell ${decoy} ${solved} row-${row - 1} col-${col - 1} group${this.state.colorGroupMap[row - 1][col - 1] || 0}" data-row="${row - 1}" data-col="${col - 1}">
                             <span class="number">${this.state.numbers[row - 1][col - 1]}</span>
                         </div>`
                     );
                 }
+            }
+        }
+
+        for (let groupId = 1; groupId <= this.state.gridSize; groupId++) {
+            const $groupSum = this.$grid.find(`.grid-cell.group${groupId}`).first();
+            if ($groupSum.length > 0) {
+                $groupSum.append(`<span class="group-sum">${this.state.colorGroupSums[groupId]}</span>`);
+                $groupSum.append(`<span class="current-sum"></span>`);
             }
         }
 
@@ -267,16 +322,109 @@ class Game {
     generateSums = function() {
         const rowSums = Array(this.state.gridSize).fill(0);
         const colSums = Array(this.state.gridSize).fill(0);
+        const colorGroupSums = Array(this.state.gridSize + 1).fill(0);
 
         for (let row = 0; row < this.state.gridSize; row++) {
             for (let col = 0; col < this.state.gridSize; col++) {
-                rowSums[row] += this.state.decoyMap[row][col] ? 0 : this.state.numbers[row][col];
-                colSums[col] += this.state.decoyMap[row][col] ? 0 : this.state.numbers[row][col];
+                const isDecoy = this.state.decoyMap[row][col];
+                const value = this.state.numbers[row][col];
+                rowSums[row] += isDecoy ? 0 : value;
+                colSums[col] += isDecoy ? 0 : value;
+                colorGroupSums[this.state.colorGroupMap[row][col]] += isDecoy ? 0 : value;
+            }
+        }
+
+        // Ensure no row or column has a sum of 0 to avoid giving away decoys
+        for (let row = 0; row < this.state.gridSize; row++) {
+            if (rowSums[row] === 0) {
+                const col = Math.floor(Math.random() * this.state.gridSize);
+                console.warn(`Row ${row} has a sum of 0, switching decoy at column ${col}.`);
+                this.state.decoyMap[row][col] = false;
+                rowSums[row] = this.state.numbers[row][col];
+                colSums[col] += this.state.numbers[row][col];
+                colorGroupSums[this.state.colorGroupMap[row][col]] += this.state.numbers[row][col];
+            }
+        }
+
+        for (let col = 0; col < this.state.gridSize; col++) {
+            if (colSums[col] === 0) {
+                const row = Math.floor(Math.random() * this.state.gridSize);
+                console.warn(`Column ${col} has a sum of 0, switching decoy at row ${row}.`);
+                this.state.decoyMap[row][col] = false;
+                rowSums[row] += this.state.numbers[row][col];
+                colSums[col] = this.state.numbers[row][col];
+                colorGroupSums[this.state.colorGroupMap[row][col]] += this.state.numbers[row][col];
             }
         }
 
         this.state.rowSums = rowSums;
         this.state.colSums = colSums;
+        this.state.colorGroupSums = colorGroupSums;
+    }
+
+    getColorGroupMap = function(rand) {
+        let groupMap = Array(this.state.gridSize).fill(null).map(() => Array(this.state.gridSize).fill(0));
+
+        if (this.settings.showColorGroups) {
+            let maxAttempts = this.state.gridSize * 5;
+            for (let groupId = 1; groupId <= this.state.gridSize; groupId++) {
+                let row, col;
+                while (true) {
+                    row = Math.floor((rand ? rand() : Math.random()) * this.state.gridSize);
+                    col = Math.floor((rand ? rand() : Math.random()) * this.state.gridSize);
+                    if (groupMap[row][col] === 0) break;
+                    if (--maxAttempts <= 0) return groupMap;
+                }
+                const newGroup = {
+                    groupId: groupId,
+                    count: 1,
+                    sum: 0,
+                    row: row,
+                    col: col,
+                    multiRow: false,
+                    multiCol: false,
+                    map: JSON.parse(JSON.stringify(groupMap))
+                };
+                this.getColorGroupRecursive(rand, newGroup);
+
+                // Criteria for valid group
+                if (newGroup.count >= 3
+                    && newGroup.count <= this.state.gridSize
+                    && newGroup.multiRow && newGroup.multiCol
+                    && newGroup.sum > 0) {
+                        groupMap = newGroup.map;
+                        console.info(`Group ${groupId} generated with starting cell (${row}, ${col})`);
+                } else {
+                        console.warn(`Group ${groupId} discarded (count: ${newGroup.count}, multiRow: ${newGroup.multiRow}, multiCol: ${newGroup.multiCol}, sum: ${newGroup.sum})`);
+                }
+            }
+        }
+
+        return groupMap;
+    }
+
+    getColorGroupRecursive = function(rand, newGroup) {
+        newGroup.map[newGroup.row][newGroup.col] = newGroup.groupId;
+        if (newGroup.count >= this.state.gridSize) return true;
+
+        let directions = [[-1, 0], [1, 0], [0, -1], [0, 1]].sort(() => (rand ? rand() : Math.random()) - 0.5);
+        while (directions.length > 0) {
+            const direction = directions.pop();
+            const newRow = newGroup.row + (direction[0]);
+            const newCol = newGroup.col + (direction[1]);
+            if (newRow >= 0 && newRow < this.state.gridSize
+                && newCol >= 0 && newCol < this.state.gridSize
+                && newGroup.map[newRow][newCol] === 0) {
+                newGroup.row = newRow;
+                newGroup.col = newCol;
+                newGroup.multiRow = newGroup.multiRow || direction[0] !== 0;
+                newGroup.multiCol = newGroup.multiCol || direction[1] !== 0;
+                newGroup.count++;
+                newGroup.sum += this.state.numbers[newRow][newCol];
+                this.getColorGroupRecursive(rand, newGroup);
+                return;
+            }
+        }
     }
 
     getDecoyMap = function() {
@@ -296,6 +444,7 @@ class Game {
                 decoyMap[row][col] = Math.random() < prob;
             }
         }
+
         return decoyMap;
     }
 
