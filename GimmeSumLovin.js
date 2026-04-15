@@ -1,3 +1,14 @@
+console = {};
+console.log = function(message) {
+    const entry = document.createElement('div');
+    entry.textContent = message;
+    document.getElementById('console').prepend(entry);
+};
+
+console.warn = console.log;
+console.error = console.log;
+console.info = console.log;
+
 $(document).ready(function() {
     const game = new Game();
 
@@ -227,29 +238,27 @@ class Game {
             }
         }
 
-        for (let i = 0; i <= this.state.gridSize; i++) {
-            if (i < this.state.gridSize) {
-                const $rowSum = $(`.sum-cell.row-${i} .number`);
-                const $rowCurSum = $(`.sum-cell.row-${i} .current-sum`);
-                $rowCurSum.text(rowCurSums[i]);
-                if (rowSolvedState[i]) {
-                    $rowSum.fadeOut(200, () => $(this).remove());
-                    $rowCurSum.fadeOut(200, () => $(this).remove());
-                }
-
-                const $colSum = $(`.sum-cell.col-${i} .number`);
-                const $colCurSum = $(`.sum-cell.col-${i} .current-sum`);
-                $colCurSum.text(colCurSums[i]);
-                if (colSolvedState[i]) {
-                    $colSum.fadeOut(200, () => $(this).remove());
-                    $colCurSum.fadeOut(200, () => $(this).remove());
-                }
+        for (let i = 0; i < this.state.gridSize; i++) {
+            const $rowSum = $(`.sum-cell.row-${i} .number`);
+            const $rowCurSum = $(`.sum-cell.row-${i} .current-sum`);
+            $rowCurSum.text(rowCurSums[i]);
+            if (rowSolvedState[i]) {
+                $rowSum.fadeOut(200, () => $(this).remove());
+                $rowCurSum.fadeOut(200, () => $(this).remove());
             }
 
-            const $groupSum = $(`.grid-cell.group${i} .group-sum`);
-            const $groupCurSum = $(`.grid-cell.group${i} .current-sum`);
-            $groupCurSum.text(groupCurSums[i]);
-            if (groupSolvedState[i]) {
+            const $colSum = $(`.sum-cell.col-${i} .number`);
+            const $colCurSum = $(`.sum-cell.col-${i} .current-sum`);
+            $colCurSum.text(colCurSums[i]);
+            if (colSolvedState[i]) {
+                $colSum.fadeOut(200, () => $(this).remove());
+                $colCurSum.fadeOut(200, () => $(this).remove());
+            }
+
+            const $groupSum = $(`.grid-cell.group${i + 1} .group-sum`);
+            const $groupCurSum = $(`.grid-cell.group${i + 1} .current-sum`);
+            $groupCurSum.text(groupCurSums[i + 1]);
+            if (groupSolvedState[i + 1]) {
                 $groupSum.fadeOut(200, () => $(this).remove());
                 $groupCurSum.fadeOut(200, () => $(this).remove());
             }
