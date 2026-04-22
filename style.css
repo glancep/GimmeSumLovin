@@ -1,0 +1,258 @@
+:root {
+  --bg-color: #fcc;
+  --bg-color-pencil: #cfc;
+  --text-color: #222;
+  --button-bg-color: #ddd;
+  --overlay-bg-color: #ffe;
+  --grid-bg-color: #f0e6d2;
+  --sum-cell-bg-color: #ffe082;
+  --sum-cell-text-color: #8484;
+  --current-sum-text-color: #000f;
+  --current-sum-bg-color: #8406;
+  --grid-cell-bg-color: #fed;
+  --grid-cell-text-color: #333;
+  --group1-bg-color: #bbf;
+  --group1-text-color: var(--grid-cell-text-color);
+  --group2-bg-color: #bff;
+  --group2-text-color: var(--grid-cell-text-color);
+  --group3-bg-color: #ffb;
+  --group3-text-color: var(--grid-cell-text-color);
+  --group4-bg-color: #f8b;
+  --group4-text-color: var(--grid-cell-text-color);
+  --group5-bg-color: #b8f;
+  --group5-text-color: var(--grid-cell-text-color);
+  --group6-bg-color: #8b8;
+  --group6-text-color: var(--grid-cell-text-color);
+  --group7-bg-color: #f88;
+  --group7-text-color: var(--grid-cell-text-color);
+  --group8-bg-color: #262;
+  --group8-text-color: var(--grid-cell-text-color);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #400;
+    --bg-color-pencil: #040;
+    --text-color: #eee;
+    --button-bg-color: #333;
+    --overlay-bg-color: #444;
+    --grid-bg-color: #333;
+    --sum-cell-bg-color: #555;
+    --sum-cell-text-color: #fc49;
+    --current-sum-text-color: #fff8;
+    --current-sum-bg-color: #0004;
+    --grid-cell-bg-color: #222;
+    --grid-cell-text-color: #fff6;
+    --group1-bg-color: #004;
+    --group1-text-color: var(--grid-cell-text-color);
+    --group2-bg-color: #044;
+    --group2-text-color: var(--grid-cell-text-color);
+    --group3-bg-color: #440;
+    --group3-text-color: var(--grid-cell-text-color);
+    --group4-bg-color: #400;
+    --group4-text-color: var(--grid-cell-text-color);
+    --group5-bg-color: #036;
+    --group5-text-color: var(--grid-cell-text-color);
+    --group6-bg-color: #040;
+    --group6-text-color: var(--grid-cell-text-color);
+    --group7-bg-color: #630;
+    --group7-text-color: var(--grid-cell-text-color);
+    --group8-bg-color: #360;
+    --group8-text-color: var(--grid-cell-text-color);
+  }
+}
+
+body {
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+
+body {
+    margin: 0;
+    padding: 0 1rem;
+    font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+    font-size: 1rem;
+    line-height: 1.5;
+    background: var(--bg-color);
+    transition: background 0.3s;
+}
+button {
+    background: var(--button-bg-color);
+    border: 1px solid #000;
+    border-radius: 4px;
+    padding: 0.5em 1em;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: #0004;
+    align-items: center;
+    justify-content: center;
+}
+.overlay-content {
+    background: var(--overlay-bg-color);
+    border-radius: 12px;
+    padding: 2em 2em;
+    text-align: center;
+    max-width: 90vw;
+    margin: auto;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+}
+body.pencilMode {
+    background: var(--bg-color-pencil);
+}
+.pencilMode #mode-btn::before {
+    content: "✏️";
+}
+#mode-btn::before {
+    content: "🗑️";
+}
+h1 {
+    font-size: 2rem;
+    margin: 0.5rem;
+    text-align: center;
+}
+.controls {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+#game-grid {
+    display: grid;
+    gap: 4px;
+    width: min(90vw, 90vh);
+    height: min(90vw, 90vh);
+    max-width: 98vw;
+    max-height: 80vh;
+    margin: 1rem auto;
+    background: var(--grid-bg-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.grid-cell, .sum-cell, .empty-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1 / 1;
+    min-width: 0;
+    min-height: 0;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+.grid-cell {
+    background: var(--grid-cell-bg-color);
+    border-radius: 4px;
+    font-weight: 999;
+    font-size: 1.5rem;
+    color: var(--grid-cell-text-color);
+    user-select: none;
+    transition: color 0.3s, background 0.3s;
+}
+.grid-cell.group1 {
+    background: var(--group1-bg-color);
+    color: var(--group1-text-color);
+}
+.grid-cell.group2 {
+    background: var(--group2-bg-color);
+    color: var(--group2-text-color);
+}
+.grid-cell.group3 {
+    background: var(--group3-bg-color);
+    color: var(--group3-text-color);
+}
+.grid-cell.group4 {
+    background: var(--group4-bg-color);
+    color: var(--group4-text-color);
+}
+.grid-cell.group5 {
+    background: var(--group5-bg-color);
+    color: var(--group5-text-color);
+}
+.grid-cell.group6 {
+    background: var(--group6-bg-color);
+    color: var(--group6-text-color);
+}
+.grid-cell.group7 {
+    background: var(--group7-bg-color);
+    color: var(--group7-text-color);
+}
+.grid-cell.group8 {
+    background: var(--group8-bg-color);
+    color: var(--group8-text-color);
+}
+.sum-cell {
+    background: var(--sum-cell-bg-color);
+    color: var(--sum-cell-text-color);
+    border-radius: 4px;
+    user-select: none;
+}
+.empty-cell {
+    background: transparent;
+    box-shadow: none;
+}
+.grid-cell.solved:not(.decoy) {
+    background-image: radial-gradient(circle 1.5em at center, transparent 90%, black, transparent);
+}
+.grid-cell.solved .number {
+    color: #090 !important;
+}
+.grid-cell.solved.decoy .number {
+    color: transparent !important;
+}
+.grid-cell.flash-wrong {
+    background: #ff5252 !important;
+    color: #fff !important;
+    transition: background 0.2s;
+}
+.current-sum {
+    background: var(--current-sum-bg-color);
+    color: var(--current-sum-text-color);
+    position: absolute;
+    top: -2px;
+    right: 0px;
+    font-size: 0.6em;
+    font-weight: 800;
+    font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+    opacity: 0.75;
+    letter-spacing: 0.01em;
+}
+.group-sum {
+    background: var(--current-sum-bg-color);
+    color: var(--current-sum-text-color);
+    position: absolute;
+    top: -2px;
+    left: 0px;
+    font-size: 0.6em;
+    font-weight: 800;
+    font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+    opacity: 0.75;
+    letter-spacing: 0.01em;
+}
+.number {
+    position: absolute;
+}
+body.disable-current-sums .current-sum {
+    display: none;
+}
+@media (max-width: 600px), (max-height: 600px) {
+    #game-grid {
+        width: min(90vw, 70vh);
+        height: min(90vw, 70vh);
+        max-width: 90vw;
+        max-height: 70vh;
+    }
+    .grid-cell {
+        font-size: 1.2rem;
+    }
+    .grid-cell.solved:not(.decoy) {
+        background-image: radial-gradient(circle 1em at center, transparent 90%, black, transparent);
+    }
+    .sum-cell {
+        font-size: 1.2rem;
+    }
+}
