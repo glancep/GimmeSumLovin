@@ -27,6 +27,7 @@
   --group7-text-color: var(--grid-cell-text-color);
   --group8-bg-color: #262;
   --group8-text-color: var(--grid-cell-text-color);
+  --solved-circle-color: #fff;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -58,6 +59,7 @@
     --group7-text-color: var(--grid-cell-text-color);
     --group8-bg-color: #360;
     --group8-text-color: var(--grid-cell-text-color);
+    --solved-circle-color: #fff;
   }
 }
 
@@ -195,9 +197,6 @@ h1 {
     background: transparent;
     box-shadow: none;
 }
-.grid-cell.solved:not(.decoy) {
-    background-image: radial-gradient(circle 1.5em at center, transparent 90%, black, transparent);
-}
 .grid-cell.solved .number {
     color: #090 !important;
 }
@@ -250,7 +249,7 @@ body.disable-current-sums .current-sum {
         font-size: 1.2rem;
     }
     .grid-cell.solved:not(.decoy) {
-        background-image: radial-gradient(circle 1em at center, transparent 90%, black, transparent);
+        background-image: radial-gradient(circle 1em at center, transparent 90%, var(--solved-circle-color), transparent);
     }
     .sum-cell {
         font-size: 1.2rem;
