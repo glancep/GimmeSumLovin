@@ -6,7 +6,7 @@
   --overlay-bg-color: #ffe;
   --grid-bg-color: #f0e6d2;
   --sum-cell-bg-color: #ffe082;
-  --sum-cell-text-color: #8484;
+  --sum-cell-text-color: #0008;
   --current-sum-text-color: #000f;
   --current-sum-bg-color: #8406;
   --grid-cell-bg-color: #fed;
@@ -27,7 +27,7 @@
   --group7-text-color: var(--grid-cell-text-color);
   --group8-bg-color: #262;
   --group8-text-color: var(--grid-cell-text-color);
-  --solved-circle-color: #fff;
+  --solved-circle-color: #000;
 }
 @media (prefers-color-scheme: dark) {
   :root {
