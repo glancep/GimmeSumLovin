@@ -19,6 +19,7 @@
     <div id="game-grid"></div>
     <div style="height: 10em;"></div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/lib/alea.min.js"></script>
     <script src="GimmeSumLovin.js"></script>
     <div id="win-popup" class="overlay" style="z-index: 1000;">
         <div class="overlay-content">
@@ -60,10 +61,9 @@
                 <span id="static-difficulty-value">3</span>
             </label><br>
             <input id="seed-input" />
+            <button id="apply-seed-btn" class="btn">Apply</button>
             <br>
             <button id="copy-seed-btn" class="btn">Copy</button>
-            <button id="apply-seed-btn" class="btn">Apply</button>
-            <button id="randomize-seed-btn" class="btn">Randomize</button>
             <button id="close-settings-btn" class="btn">Close</button>
         </div>
     </div>

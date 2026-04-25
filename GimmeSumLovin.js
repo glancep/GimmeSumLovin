@@ -80,25 +80,37 @@ class Game {
         }
 
         this.togglePencilMode(this.state.pencilMode);
+        $('#seed-input').val(this.state.seed);
     }
 
     saveState = function() {
         localStorage.setItem('state', JSON.stringify(this.state));
     }
 
-    newGame = function() {
+    getRandomSeed = function() {
+        const chars = 'abcdefghijklmnopqrstuvwxyz';
+        let seed = '';
+        for (let i = 0; i < 8; i++) {
+            seed += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return seed;
+    }
+
+    newGame = function(seed) {
         this.loadSettings();
         this.state = {
+            seed: seed || this.getRandomSeed(),
             gridSize: parseInt(this.settings.gridSize),
             pencilMode: false,
             lives: 3,
             maxLives: 3,
         };
-        this.state.numbers = this.getNumbers();
-        this.state.decoyMap = this.getDecoyMap();
-        this.state.solveMap = this.getSolveMap();
-        this.state.colorGroupMap = this.getColorGroupMap();
-        this.generateSums();
+        const rand = new alea(this.state.seed);
+        this.generateNumbers(rand);
+        this.generateDecoyMap(rand);
+        this.generateColorGroupMap(rand);
+        this.generateSolveMap();
+        this.generateSums(rand);
         this.saveState();
 
         this.togglePencilMode(this.state.pencilMode);
@@ -107,7 +119,7 @@ class Game {
     }
 
     resetGame = function() {
-        this.state.solveMap = this.getSolveMap();
+        this.generateSolveMap();
         this.state.lives = this.state.maxLives;
         this.saveState();
 
@@ -169,6 +181,13 @@ class Game {
         });
         $('#close-settings-btn').click(() => {
             $('#settings-popup').fadeOut(200);
+        });
+        $('#apply-seed-btn').click(() => {
+            const newSeed = $('#seed-input').val().trim();
+            if (newSeed) {
+                $('#settings-popup').fadeOut(200);
+                this.newGame(newSeed);
+            }
         });
         $('#show-current-sums').change(() => {
             this.settings.showSums = $('#show-current-sums').is(':checked');
@@ -325,7 +344,7 @@ class Game {
         this.bindCellEvents();
     }
 
-    getNumbers = function(rand) {
+    generateNumbers = function(rand) {
         const arr = [];
         for (let row = 0; row < this.state.gridSize; row++) {
             arr[row] = [];
@@ -333,10 +352,10 @@ class Game {
                 arr[row][col] = Math.floor((rand ? rand() : Math.random()) * 9) + 1;
             }
         }
-        return arr;
+        this.state.numbers = arr;
     }
 
-    generateSums = function() {
+    generateSums = function(rand) {
         const rowSums = Array(this.state.gridSize).fill(0);
         const colSums = Array(this.state.gridSize).fill(0);
         const colorGroupSums = Array(this.state.gridSize + 1).fill(0);
@@ -354,7 +373,7 @@ class Game {
         // Ensure no row or column has a sum of 0 to avoid giving away decoys
         for (let row = 0; row < this.state.gridSize; row++) {
             if (rowSums[row] === 0) {
-                const col = Math.floor(Math.random() * this.state.gridSize);
+                const col = Math.floor((rand ? rand() : Math.random()) * this.state.gridSize);
                 console.warn(`Row ${row} has a sum of 0, switching decoy at column ${col}.`);
                 this.state.decoyMap[row][col] = false;
                 rowSums[row] = this.state.numbers[row][col];
@@ -365,7 +384,7 @@ class Game {
 
         for (let col = 0; col < this.state.gridSize; col++) {
             if (colSums[col] === 0) {
-                const row = Math.floor(Math.random() * this.state.gridSize);
+                const row = Math.floor((rand ? rand() : Math.random()) * this.state.gridSize);
                 console.warn(`Column ${col} has a sum of 0, switching decoy at row ${row}.`);
                 this.state.decoyMap[row][col] = false;
                 rowSums[row] += this.state.numbers[row][col];
@@ -379,7 +398,7 @@ class Game {
         this.state.colorGroupSums = colorGroupSums;
     }
 
-    getColorGroupMap = function(rand) {
+    generateColorGroupMap = function(rand) {
         let groupMap = Array(this.state.gridSize).fill(null).map(() => Array(this.state.gridSize).fill(0));
 
         if (this.settings.showColorGroups) {
@@ -417,7 +436,7 @@ class Game {
             }
         }
 
-        return groupMap;
+        this.state.colorGroupMap = groupMap;
     }
 
     getColorGroupRecursive = function(rand, newGroup) {
@@ -444,32 +463,32 @@ class Game {
         }
     }
 
-    getDecoyMap = function() {
+    generateDecoyMap = function(rand) {
         const sparseRows = [];
         const sparseCols = [];
 
         for (let row = 0; row < this.state.gridSize; row++)
-            sparseRows[row] = Math.random() > this.settings.difficulty / 10;
+            sparseRows[row] = (rand ? rand() : Math.random()) > this.settings.difficulty / 10;
         for (let col = 0; col < this.state.gridSize; col++)
-            sparseCols[col] = Math.random() > this.settings.difficulty / 10;
+            sparseCols[col] = (rand ? rand() : Math.random()) > this.settings.difficulty / 10;
 
         const decoyMap = [];
         for (let row = 0; row < this.state.gridSize; row++) {
             decoyMap[row] = [];
             for (let col = 0; col < this.state.gridSize; col++) {
                 const prob = sparseRows[row] || sparseCols[col] ? this.settings.sparseProbability : this.settings.stdProbability;
-                decoyMap[row][col] = Math.random() < prob;
+                decoyMap[row][col] = (rand ? rand() : Math.random()) < prob;
             }
         }
 
-        return decoyMap;
+        this.state.decoyMap = decoyMap;
     }
 
-    getSolveMap = function() {
+    generateSolveMap = function() {
         const solveMap = [];
         for (let row = 0; row < this.state.gridSize; row++)
             solveMap[row] = Array(this.state.gridSize).fill(false);
-        return solveMap;
+        this.state.solveMap = solveMap;
     }
 }
 
