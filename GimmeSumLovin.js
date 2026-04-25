@@ -46,6 +46,9 @@ class Game {
             showColorGroups: true,
             stdProbability: 0.25,
             sparseProbability: 0.75,
+            currentStreak: 0,
+            lastDateCompleted: null,
+            streakFreezes: 3,
         };
         const settings = JSON.parse(localStorage.getItem('settings') || '{}');
 
@@ -63,6 +66,11 @@ class Game {
         $('#static-difficulty-slider').val(this.settings.difficulty);
         $('#static-difficulty-value').text(this.settings.difficulty);
         $('#static-difficulty-lbl').toggle(this.settings.staticDifficulty);
+
+        $('#current-streak').text(this.settings.currentStreak);
+        let freezes = "";
+        for (let i = 0; i < this.settings.streakFreezes; i++) freezes += "❄️";
+        $('#freezes').text(freezes);
     }
 
     saveSettings = function() {
@@ -96,9 +104,12 @@ class Game {
         return seed;
     }
 
-    newGame = function(seed) {
+    newGame = function(seed, isDaily) {
+        if (isDaily === true) seed = new Date().toLocaleDateString('en-CA');
+
         this.loadSettings();
         this.state = {
+            isDaily: isDaily === true,
             seed: seed || this.getRandomSeed(),
             gridSize: parseInt(this.settings.gridSize),
             pencilMode: false,
@@ -116,6 +127,8 @@ class Game {
         this.togglePencilMode(this.state.pencilMode);
         this.renderGrid();
         this.updateLives();
+
+        $('#seed-input').val(this.state.seed);
     }
 
     resetGame = function() {
@@ -125,6 +138,21 @@ class Game {
 
         this.renderGrid();
         this.updateLives();
+    }
+
+    wonGame = function() {
+        $('#win-popup').fadeIn(200);
+
+        if (this.state.isDaily) {
+            const today = new Date().toLocaleDateString('en-CA');
+            this.settings.currentStreak += 1;
+            this.settings.lastDateCompleted = today;
+            this.saveSettings();
+        }
+    }
+
+    lostGame = function() {
+        $('#lose-popup').fadeIn(200);
     }
 
     updateLives = function(value) {
@@ -137,9 +165,7 @@ class Game {
         $lives.html(livesText);
         console.info(`Lives: ${this.state.lives}`);
 
-        if (this.state.lives <= 0) {
-            $('#lose-popup').fadeIn(200);
-        }
+        if (this.state.lives <= 0) this.lostGame();
     }
 
     togglePencilMode = function(newMode) {
@@ -173,6 +199,19 @@ class Game {
         $('#close-lose-btn').click(() => {
             $('#lose-popup').fadeOut(200);
             this.resetGame();
+        });
+
+        $('#streak-btn').click(() => {
+            $('#streak-popup').fadeIn(200);
+        });
+        $('#close-streak-btn').click(() => {
+            $('#streak-popup').fadeOut(200);
+        });
+        $('#play-today-btn').click(() => {
+            if (confirm("Are you sure?  This will clear the current puzzle!")) {
+                $('#streak-popup').fadeOut(200);
+                this.newGame(null, true);
+            }
         });
 
         // Settings
@@ -291,7 +330,7 @@ class Game {
             }
         }
 
-        if (solved) $('#win-popup').fadeIn(200);
+        if (solved) this.wonGame();
     }
 
     renderGrid = function() {

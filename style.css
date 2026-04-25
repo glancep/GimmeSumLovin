@@ -79,6 +79,7 @@ body {
 }
 button {
     background: var(--button-bg-color);
+    color: var(--text-color);
     border: 1px solid #000;
     border-radius: 4px;
     padding: 0.5em 1em;
