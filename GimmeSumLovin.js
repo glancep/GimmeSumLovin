@@ -49,6 +49,7 @@ class Game {
             currentStreak: 0,
             lastDateCompleted: null,
             streakFreezes: 3,
+            currentLevel: 1,
         };
         const settings = JSON.parse(localStorage.getItem('settings') || '{}');
 
@@ -95,13 +96,11 @@ class Game {
         localStorage.setItem('state', JSON.stringify(this.state));
     }
 
-    getRandomSeed = function() {
-        const chars = 'abcdefghijklmnopqrstuvwxyz';
-        let seed = '';
-        for (let i = 0; i < 8; i++) {
-            seed += chars.charAt(Math.floor(Math.random() * chars.length));
+    getCurrentLevel = function() {
+        if (!this.settings.currentLevel) {
+            this.settings.currentLevel = 1;
         }
-        return seed;
+        return this.settings.currentLevel;
     }
 
     newGame = function(seed, isDaily) {
@@ -110,7 +109,7 @@ class Game {
         this.loadSettings();
         this.state = {
             isDaily: isDaily === true,
-            seed: seed || this.getRandomSeed(),
+            seed: seed || this.getCurrentLevel(),
             gridSize: parseInt(this.settings.gridSize),
             pencilMode: false,
             lives: 3,
@@ -147,6 +146,9 @@ class Game {
             const today = new Date().toLocaleDateString('en-CA');
             this.settings.currentStreak += 1;
             this.settings.lastDateCompleted = today;
+            this.saveSettings();
+        } else if (this.state.seed == this.settings.currentLevel) {
+            this.settings.currentLevel += 1;
             this.saveSettings();
         }
     }
@@ -378,6 +380,12 @@ class Game {
                 $groupSum.append(`<span class="current-sum"></span>`);
             }
         }
+
+        const $currentGame = $('#current-game');
+        let level = `Level ${this.state.seed}`;
+        if (this.state.isDaily) level += " 📆";
+        if (this.state.seed == this.settings.currentLevel) level += " ⚡";
+        $currentGame.text(level);
 
         this.updateCurrentSums();
         this.bindCellEvents();

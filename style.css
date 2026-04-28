@@ -42,7 +42,7 @@
     --current-sum-text-color: #fff8;
     --current-sum-bg-color: #0004;
     --grid-cell-bg-color: #222;
-    --grid-cell-text-color: #fff6;
+    --grid-cell-text-color: #fffb;
     --group1-bg-color: #004;
     --group1-text-color: var(--grid-cell-text-color);
     --group2-bg-color: #044;
@@ -120,11 +120,17 @@ h1 {
     margin: 0.5rem;
     text-align: center;
 }
+h2 {
+    font-size: 1rem;
+    margin: 0.25rem;
+    text-align: center;
+}
 .controls {
     text-align: center;
     margin-bottom: 1rem;
 }
 #game-grid {
+    touch-action: manipulation;
     display: grid;
     gap: 4px;
     width: min(90vw, 90vh);
