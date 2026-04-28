@@ -6,7 +6,7 @@
   --overlay-bg-color: #ffe;
   --grid-bg-color: #f0e6d2;
   --sum-cell-bg-color: #ffe082;
-  --sum-cell-text-color: #8484;
+  --sum-cell-text-color: #0008;
   --current-sum-text-color: #000f;
   --current-sum-bg-color: #8406;
   --grid-cell-bg-color: #fed;
@@ -27,7 +27,7 @@
   --group7-text-color: var(--grid-cell-text-color);
   --group8-bg-color: #262;
   --group8-text-color: var(--grid-cell-text-color);
-  --solved-circle-color: #fff;
+  --solved-circle-color: #000;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -42,7 +42,7 @@
     --current-sum-text-color: #fff8;
     --current-sum-bg-color: #0004;
     --grid-cell-bg-color: #222;
-    --grid-cell-text-color: #fff6;
+    --grid-cell-text-color: #fffb;
     --group1-bg-color: #004;
     --group1-text-color: var(--grid-cell-text-color);
     --group2-bg-color: #044;
@@ -79,6 +79,7 @@ body {
 }
 button {
     background: var(--button-bg-color);
+    color: var(--text-color);
     border: 1px solid #000;
     border-radius: 4px;
     padding: 0.5em 1em;
@@ -119,11 +120,17 @@ h1 {
     margin: 0.5rem;
     text-align: center;
 }
+h2 {
+    font-size: 1rem;
+    margin: 0.25rem;
+    text-align: center;
+}
 .controls {
     text-align: center;
     margin-bottom: 1rem;
 }
 #game-grid {
+    touch-action: manipulation;
     display: grid;
     gap: 4px;
     width: min(90vw, 90vh);
