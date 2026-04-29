@@ -151,6 +151,67 @@ class Game {
             this.settings.currentLevel += 1;
             this.saveSettings();
         }
+
+        this.showConfetti();
+    }
+
+    showConfetti = function() {
+        const $canvas = $('canvas.confetti-canvas');
+
+        const canvas = $canvas[0];
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const ctx = canvas.getContext('2d');
+
+        // Confetti parameters
+        const confettiCount = 120;
+        const colors = ['#ffb300', '#ff5252', '#4fc3f7', '#81c784', '#ffd54f', '#f06292', '#fff176'];
+        const confetti = [];
+
+        for (let i = 0; i < confettiCount; i++) {
+            confetti.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * -canvas.height,
+                r: Math.random() * 6 + 14,
+                d: Math.random() * confettiCount,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                tilt: Math.random() * 10 - 10,
+                tiltAngleIncremental: (Math.random() * 0.07) + .05,
+                tiltAngle: 0
+            });
+        }
+
+        let angle = 0;
+        let tiltAngle = 0;
+        let animationFrame;
+
+        function drawConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            angle += 0.01;
+            tiltAngle += 0.1;
+
+            for (let i = 0; i < confetti.length; i++) {
+                let c = confetti[i];
+                c.tiltAngle += c.tiltAngleIncremental;
+                c.y += (Math.cos(angle + c.d) + 3 + c.r / 2) / 2;
+                c.tilt = Math.sin(c.tiltAngle - (i % 3)) * 15;
+
+                ctx.beginPath();
+                ctx.lineWidth = c.r;
+                ctx.strokeStyle = c.color;
+                ctx.moveTo(c.x + c.tilt + c.r / 3, c.y);
+                ctx.lineTo(c.x + c.tilt, c.y + c.tilt + c.r / 5);
+                ctx.stroke();
+            }
+
+            animationFrame = requestAnimationFrame(drawConfetti);
+        }
+
+        drawConfetti();
+
+        setTimeout(() => {
+            cancelAnimationFrame(animationFrame);
+        }, 10000);
     }
 
     lostGame = function() {
