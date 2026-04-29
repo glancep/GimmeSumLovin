@@ -139,14 +139,36 @@ class Game {
         this.updateLives();
     }
 
+    evaluateStreak = function(isWin) {
+        const today = new Date().toLocaleDateString('en-CA');
+        const diff = Math.floor((Date.parse(today) - Date.parse(this.settings.lastDateCompleted)) / 86400000) - 1;
+
+        if (this.settings.lastDateCompleted && diff < 0) {
+            alert("It looks like you've already completed today's puzzle. Please come back tomorrow for a new one! 😊");
+            return;
+        }
+
+        this.settings.streakFreezes = Math.max(0, this.settings.streakFreezes - diff);
+        if (this.settings.streakFreezes <= 0) {
+            alert("Your streak has been frozen for too long and has been reset. 😢");
+            this.settings.currentStreak = 0;
+            this.settings.streakFreezes = 3;
+            this.settings.lastDateCompleted = null;
+        }
+
+        if (isWin) {
+            this.settings.currentStreak += 1;
+            this.settings.lastDateCompleted = today;
+        }
+
+        this.saveSettings();
+    }
+
     wonGame = function() {
         $('#win-popup').fadeIn(200);
 
         if (this.state.isDaily) {
-            const today = new Date().toLocaleDateString('en-CA');
-            this.settings.currentStreak += 1;
-            this.settings.lastDateCompleted = today;
-            this.saveSettings();
+            this.evaluateStreak(true);
         } else if (this.state.seed == this.settings.currentLevel) {
             this.settings.currentLevel += 1;
             this.saveSettings();
@@ -216,6 +238,10 @@ class Game {
 
     lostGame = function() {
         $('#lose-popup').fadeIn(200);
+
+        if (this.state.isDaily) {
+            this.evaluateStreak(false);
+        }
     }
 
     updateLives = function(value) {
@@ -498,6 +524,21 @@ class Game {
                 rowSums[row] += this.state.numbers[row][col];
                 colSums[col] = this.state.numbers[row][col];
                 colorGroupSums[this.state.colorGroupMap[row][col]] += this.state.numbers[row][col];
+            }
+        }
+
+        for (let groupId = 1; groupId <= this.state.gridSize; groupId++) {
+            for (let row = 0; colorGroupSums[groupId] === 0 && row < this.state.gridSize; row++) {
+                for (let col = 0; col < this.state.gridSize; col++) {
+                    if (this.state.colorGroupMap[row][col] === groupId) {
+                        console.warn(`Color group ${groupId} has a sum of 0, switching decoy at cell (${row}, ${col}).`);
+                        this.state.decoyMap[row][col] = false;
+                        rowSums[row] += this.state.numbers[row][col];
+                        colSums[col] += this.state.numbers[row][col];
+                        colorGroupSums[groupId] = this.state.numbers[row][col];
+                        break;
+                    }
+                }
             }
         }
 
