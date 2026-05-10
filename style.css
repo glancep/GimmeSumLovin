@@ -29,8 +29,39 @@
   --group8-text-color: var(--grid-cell-text-color);
   --solved-circle-color: #000;
 }
+:root[data-theme="dark"] {
+  --bg-color: #400;
+  --bg-color-pencil: #040;
+  --text-color: #eee;
+  --button-bg-color: #333;
+  --overlay-bg-color: #444;
+  --grid-bg-color: #333;
+  --sum-cell-bg-color: #555;
+  --sum-cell-text-color: #fc49;
+  --current-sum-text-color: #fff8;
+  --current-sum-bg-color: #0004;
+  --grid-cell-bg-color: #222;
+  --grid-cell-text-color: #fffb;
+  --group1-bg-color: #004;
+  --group1-text-color: var(--grid-cell-text-color);
+  --group2-bg-color: #064;
+  --group2-text-color: var(--grid-cell-text-color);
+  --group3-bg-color: #440;
+  --group3-text-color: var(--grid-cell-text-color);
+  --group4-bg-color: #400;
+  --group4-text-color: var(--grid-cell-text-color);
+  --group5-bg-color: #036;
+  --group5-text-color: var(--grid-cell-text-color);
+  --group6-bg-color: #040;
+  --group6-text-color: var(--grid-cell-text-color);
+  --group7-bg-color: #630;
+  --group7-text-color: var(--grid-cell-text-color);
+  --group8-bg-color: #360;
+  --group8-text-color: var(--grid-cell-text-color);
+  --solved-circle-color: #fff;
+}
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root[data-theme="auto"] {
     --bg-color: #400;
     --bg-color-pencil: #040;
     --text-color: #eee;

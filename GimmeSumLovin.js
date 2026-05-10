@@ -50,6 +50,7 @@ class Game {
             lastDateCompleted: null,
             streakFreezes: 3,
             currentLevel: 1,
+            theme: 'auto',
         };
         const settings = JSON.parse(localStorage.getItem('settings') || '{}');
 
@@ -67,6 +68,8 @@ class Game {
         $('#static-difficulty-slider').val(this.settings.difficulty);
         $('#static-difficulty-value').text(this.settings.difficulty);
         $('#static-difficulty-lbl').toggle(this.settings.staticDifficulty);
+        $('#theme-select').val(this.settings.theme);
+        $('html').attr('data-theme', this.settings.theme);
 
         $('#current-streak').text(this.settings.currentStreak);
         let freezes = "";
@@ -341,6 +344,12 @@ class Game {
             this.settings.difficulty = parseInt($('#static-difficulty-slider').val());
             this.saveSettings();
             $('#static-difficulty-value').text(this.settings.difficulty);
+        });
+        $('#theme-select').change(() => {
+            const theme = $('#theme-select').val();
+            $('html').attr('data-theme', theme);
+            this.settings.theme = theme;
+            this.saveSettings();
         });
     }
 
