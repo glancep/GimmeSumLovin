@@ -60,8 +60,9 @@ class Game {
         this.saveSettings();
 
         $('#show-current-sums').prop('checked', this.settings.showSums);
-        $('#show-color-groups').prop('checked', this.settings.showColorGroups);
         $('body').toggleClass('disable-current-sums', !this.settings.showSums);
+        $('#show-color-groups').prop('checked', this.settings.showColorGroups);
+        $('body').toggleClass('disable-color-groups', !this.settings.showColorGroups);
         $('#static-grid-size').prop('checked', this.settings.staticGridSize);
         $('#static-grid-size-slider').val(this.settings.gridSize);
         $('#static-grid-size-value').text(this.settings.gridSize);
@@ -332,6 +333,11 @@ class Game {
             this.saveSettings();
             $('body').toggleClass('disable-current-sums', !this.settings.showSums);
         });
+        $('#show-color-groups').change(() => {
+            this.settings.showColorGroups = $('#show-color-groups').is(':checked');
+            this.saveSettings();
+            $('body').toggleClass('disable-color-groups', !this.settings.showColorGroups);
+        });
         $('#static-grid-size').change(() => {
             this.settings.staticGridSize = $('#static-grid-size').is(':checked');
             this.saveSettings();
@@ -566,38 +572,36 @@ class Game {
     generateColorGroupMap = function(rand) {
         let groupMap = Array(this.state.gridSize).fill(null).map(() => Array(this.state.gridSize).fill(0));
 
-        if (this.settings.showColorGroups) {
-            let maxAttempts = this.state.gridSize * 5;
-            for (let groupId = 1; groupId <= this.state.gridSize; groupId++) {
-                let row, col;
-                while (true) {
-                    row = Math.floor((rand ? rand() : Math.random()) * this.state.gridSize);
-                    col = Math.floor((rand ? rand() : Math.random()) * this.state.gridSize);
-                    if (groupMap[row][col] === 0) break;
-                    if (--maxAttempts <= 0) return groupMap;
-                }
-                const newGroup = {
-                    groupId: groupId,
-                    count: 1,
-                    sum: 0,
-                    row: row,
-                    col: col,
-                    multiRow: false,
-                    multiCol: false,
-                    map: JSON.parse(JSON.stringify(groupMap))
-                };
-                this.getColorGroupRecursive(rand, newGroup);
+        let maxAttempts = this.state.gridSize * 5;
+        for (let groupId = 1; groupId <= this.state.gridSize; groupId++) {
+            let row, col;
+            while (true) {
+                row = Math.floor((rand ? rand() : Math.random()) * this.state.gridSize);
+                col = Math.floor((rand ? rand() : Math.random()) * this.state.gridSize);
+                if (groupMap[row][col] === 0) break;
+                if (--maxAttempts <= 0) return groupMap;
+            }
+            const newGroup = {
+                groupId: groupId,
+                count: 1,
+                sum: 0,
+                row: row,
+                col: col,
+                multiRow: false,
+                multiCol: false,
+                map: JSON.parse(JSON.stringify(groupMap))
+            };
+            this.getColorGroupRecursive(rand, newGroup);
 
-                // Criteria for valid group
-                if (newGroup.count >= 3
-                    && newGroup.count <= this.state.gridSize
-                    && newGroup.multiRow && newGroup.multiCol
-                    && newGroup.sum > 0) {
-                        groupMap = newGroup.map;
-                        console.info(`Group ${groupId} generated with starting cell (${row}, ${col})`);
-                } else {
-                        console.warn(`Group ${groupId} discarded (count: ${newGroup.count}, multiRow: ${newGroup.multiRow}, multiCol: ${newGroup.multiCol}, sum: ${newGroup.sum})`);
-                }
+            // Criteria for valid group
+            if (newGroup.count >= 3
+                && newGroup.count <= this.state.gridSize
+                && newGroup.multiRow && newGroup.multiCol
+                && newGroup.sum > 0) {
+                    groupMap = newGroup.map;
+                    console.info(`Group ${groupId} generated with starting cell (${row}, ${col})`);
+            } else {
+                    console.warn(`Group ${groupId} discarded (count: ${newGroup.count}, multiRow: ${newGroup.multiRow}, multiCol: ${newGroup.multiCol}, sum: ${newGroup.sum})`);
             }
         }
 

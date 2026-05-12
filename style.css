@@ -200,35 +200,35 @@ h2 {
     user-select: none;
     transition: color 0.3s, background 0.3s;
 }
-.grid-cell.group1 {
+body:not(.disable-color-groups) .grid-cell.group1 {
     background: var(--group1-bg-color);
     color: var(--group1-text-color);
 }
-.grid-cell.group2 {
+body:not(.disable-color-groups) .grid-cell.group2 {
     background: var(--group2-bg-color);
     color: var(--group2-text-color);
 }
-.grid-cell.group3 {
+body:not(.disable-color-groups) .grid-cell.group3 {
     background: var(--group3-bg-color);
     color: var(--group3-text-color);
 }
-.grid-cell.group4 {
+body:not(.disable-color-groups) .grid-cell.group4 {
     background: var(--group4-bg-color);
     color: var(--group4-text-color);
 }
-.grid-cell.group5 {
+body:not(.disable-color-groups) .grid-cell.group5 {
     background: var(--group5-bg-color);
     color: var(--group5-text-color);
 }
-.grid-cell.group6 {
+body:not(.disable-color-groups) .grid-cell.group6 {
     background: var(--group6-bg-color);
     color: var(--group6-text-color);
 }
-.grid-cell.group7 {
+body:not(.disable-color-groups) .grid-cell.group7 {
     background: var(--group7-bg-color);
     color: var(--group7-text-color);
 }
-.grid-cell.group8 {
+body:not(.disable-color-groups) .grid-cell.group8 {
     background: var(--group8-bg-color);
     color: var(--group8-text-color);
 }
@@ -283,6 +283,12 @@ h2 {
 body.disable-current-sums .current-sum {
     display: none;
 }
+body.disable-color-groups .grid-cell .current-sum {
+    display: none;
+}
+body.disable-color-groups .group-sum {
+    display: none;
+}
 @media (max-width: 600px), (max-height: 600px) {
     #game-grid {
         width: min(90vw, 70vh);
@@ -294,7 +300,7 @@ body.disable-current-sums .current-sum {
         font-size: 1.2rem;
     }
     .grid-cell.solved:not(.decoy) {
-        background-image: radial-gradient(circle 1em at center, transparent 90%, var(--solved-circle-color), transparent);
+        background-image: radial-gradient(circle 1em at center, transparent 90%, var(--solved-circle-color), transparent) !important;
     }
     .sum-cell {
         font-size: 1.2rem;
