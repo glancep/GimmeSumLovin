@@ -1,3 +1,4 @@
+/*
 console = {};
 console.log = function(message) {
     const entry = document.createElement('div');
@@ -8,6 +9,7 @@ console.log = function(message) {
 console.warn = console.log;
 console.error = console.log;
 console.info = console.log;
+*/
 
 $(document).ready(function() {
     $('#reset-state-btn').click(function() {
@@ -75,6 +77,7 @@ class Game {
         let freezes = "";
         for (let i = 0; i < this.settings.streakFreezes; i++) freezes += "❄️";
         $('#freezes').text(freezes);
+        $('#last-completed-daily').text(this.settings.lastDateCompleted || "N/A");
     }
 
     saveSettings = function() {
@@ -144,19 +147,23 @@ class Game {
 
     evaluateStreak = function(isWin) {
         const today = new Date().toLocaleDateString('en-CA');
-        const diff = Math.floor((Date.parse(today) - Date.parse(this.settings.lastDateCompleted)) / 86400000) - 1;
 
-        if (this.settings.lastDateCompleted && diff < 0) {
-            alert("It looks like you've already completed today's puzzle. Please come back tomorrow for a new one! 😊");
-            return;
-        }
+        // Only evaluate streak freezes after the first day
+        if (!(this.settings.currentStreak > 0)) {
+            const diff = Math.floor((Date.parse(today) - Date.parse(this.settings.lastDateCompleted)) / 86400000) - 1;
 
-        this.settings.streakFreezes = Math.max(0, this.settings.streakFreezes - diff);
-        if (this.settings.streakFreezes <= 0) {
-            alert("Your streak has been frozen for too long and has been reset. 😢");
-            this.settings.currentStreak = 0;
-            this.settings.streakFreezes = 3;
-            this.settings.lastDateCompleted = null;
+            if (this.settings.lastDateCompleted && diff < 0) {
+                alert("It looks like you've already completed today's puzzle. Please come back tomorrow for a new one! 😊");
+                return;
+            }
+
+            this.settings.streakFreezes = Math.max(0, this.settings.streakFreezes - diff);
+            if (this.settings.streakFreezes <= 0) {
+                alert("Your streak has been frozen for too long and has been reset. 😢");
+                this.settings.currentStreak = 0;
+                this.settings.streakFreezes = 3;
+                this.settings.lastDateCompleted = null;
+            }
         }
 
         if (isWin) {
