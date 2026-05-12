@@ -46,6 +46,7 @@ class Game {
             difficulty: 5,
             showSums: true,
             showColorGroups: true,
+            inactiveCellToggleMode: true,
             stdProbability: 0.25,
             sparseProbability: 0.75,
             currentStreak: 0,
@@ -63,6 +64,7 @@ class Game {
         $('body').toggleClass('disable-current-sums', !this.settings.showSums);
         $('#show-color-groups').prop('checked', this.settings.showColorGroups);
         $('body').toggleClass('disable-color-groups', !this.settings.showColorGroups);
+        $('#inactive-cell-toggle-mode').prop('checked', this.settings.inactiveCellToggleMode);
         $('#static-grid-size').prop('checked', this.settings.staticGridSize);
         $('#static-grid-size-slider').val(this.settings.gridSize);
         $('#static-grid-size-value').text(this.settings.gridSize);
@@ -338,6 +340,10 @@ class Game {
             this.saveSettings();
             $('body').toggleClass('disable-color-groups', !this.settings.showColorGroups);
         });
+        $('#inactive-cell-toggle-mode').change(() => {
+            this.settings.inactiveCellToggleMode = $('#inactive-cell-toggle-mode').is(':checked');
+            this.saveSettings();
+        });
         $('#static-grid-size').change(() => {
             this.settings.staticGridSize = $('#static-grid-size').is(':checked');
             this.saveSettings();
@@ -370,7 +376,11 @@ class Game {
         this.$grid.off('click', '.grid-cell').on('click', '.grid-cell', (e) => {
             const $cell = $(e.currentTarget);
 
-            if ($cell.hasClass('solved')) return;
+            if ($cell.hasClass('solved')) {
+                if (!this.settings.inactiveCellToggleMode)
+                    e.stopPropagation();
+                return;
+            }
 
             const row = $cell.data('row');
             const col = $cell.data('col');
