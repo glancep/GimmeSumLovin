@@ -1,3 +1,4 @@
+/*
 console = {};
 console.log = function(message) {
     const entry = document.createElement('div');
@@ -8,6 +9,7 @@ console.log = function(message) {
 console.warn = console.log;
 console.error = console.log;
 console.info = console.log;
+*/
 
 $(document).ready(function() {
     $('#reset-state-btn').click(function() {
@@ -58,8 +60,9 @@ class Game {
         this.saveSettings();
 
         $('#show-current-sums').prop('checked', this.settings.showSums);
-        $('#show-color-groups').prop('checked', this.settings.showColorGroups);
         $('body').toggleClass('disable-current-sums', !this.settings.showSums);
+        $('#show-color-groups').prop('checked', this.settings.showColorGroups);
+        $('body').toggleClass('disable-color-groups', !this.settings.showColorGroups);
         $('#static-grid-size').prop('checked', this.settings.staticGridSize);
         $('#static-grid-size-slider').val(this.settings.gridSize);
         $('#static-grid-size-value').text(this.settings.gridSize);
@@ -75,6 +78,7 @@ class Game {
         let freezes = "";
         for (let i = 0; i < this.settings.streakFreezes; i++) freezes += "❄️";
         $('#freezes').text(freezes);
+        $('#last-completed-daily').text(this.settings.lastDateCompleted || "N/A");
     }
 
     saveSettings = function() {
@@ -144,19 +148,23 @@ class Game {
 
     evaluateStreak = function(isWin) {
         const today = new Date().toLocaleDateString('en-CA');
-        const diff = Math.floor((Date.parse(today) - Date.parse(this.settings.lastDateCompleted)) / 86400000) - 1;
 
-        if (this.settings.lastDateCompleted && diff < 0) {
-            alert("It looks like you've already completed today's puzzle. Please come back tomorrow for a new one! 😊");
-            return;
-        }
+        // Only evaluate streak freezes after the first day
+        if (!(this.settings.currentStreak > 0)) {
+            const diff = Math.floor((Date.parse(today) - Date.parse(this.settings.lastDateCompleted)) / 86400000) - 1;
 
-        this.settings.streakFreezes = Math.max(0, this.settings.streakFreezes - diff);
-        if (this.settings.streakFreezes <= 0) {
-            alert("Your streak has been frozen for too long and has been reset. 😢");
-            this.settings.currentStreak = 0;
-            this.settings.streakFreezes = 3;
-            this.settings.lastDateCompleted = null;
+            if (this.settings.lastDateCompleted && diff < 0) {
+                alert("It looks like you've already completed today's puzzle. Please come back tomorrow for a new one! 😊");
+                return;
+            }
+
+            this.settings.streakFreezes = Math.max(0, this.settings.streakFreezes - diff);
+            if (this.settings.streakFreezes <= 0) {
+                alert("Your streak has been frozen for too long and has been reset. 😢");
+                this.settings.currentStreak = 0;
+                this.settings.streakFreezes = 3;
+                this.settings.lastDateCompleted = null;
+            }
         }
 
         if (isWin) {
@@ -324,6 +332,11 @@ class Game {
             this.settings.showSums = $('#show-current-sums').is(':checked');
             this.saveSettings();
             $('body').toggleClass('disable-current-sums', !this.settings.showSums);
+        });
+        $('#show-color-groups').change(() => {
+            this.settings.showColorGroups = $('#show-color-groups').is(':checked');
+            this.saveSettings();
+            $('body').toggleClass('disable-color-groups', !this.settings.showColorGroups);
         });
         $('#static-grid-size').change(() => {
             this.settings.staticGridSize = $('#static-grid-size').is(':checked');
@@ -559,38 +572,36 @@ class Game {
     generateColorGroupMap = function(rand) {
         let groupMap = Array(this.state.gridSize).fill(null).map(() => Array(this.state.gridSize).fill(0));
 
-        if (this.settings.showColorGroups) {
-            let maxAttempts = this.state.gridSize * 5;
-            for (let groupId = 1; groupId <= this.state.gridSize; groupId++) {
-                let row, col;
-                while (true) {
-                    row = Math.floor((rand ? rand() : Math.random()) * this.state.gridSize);
-                    col = Math.floor((rand ? rand() : Math.random()) * this.state.gridSize);
-                    if (groupMap[row][col] === 0) break;
-                    if (--maxAttempts <= 0) return groupMap;
-                }
-                const newGroup = {
-                    groupId: groupId,
-                    count: 1,
-                    sum: 0,
-                    row: row,
-                    col: col,
-                    multiRow: false,
-                    multiCol: false,
-                    map: JSON.parse(JSON.stringify(groupMap))
-                };
-                this.getColorGroupRecursive(rand, newGroup);
+        let maxAttempts = this.state.gridSize * 5;
+        for (let groupId = 1; groupId <= this.state.gridSize; groupId++) {
+            let row, col;
+            while (true) {
+                row = Math.floor((rand ? rand() : Math.random()) * this.state.gridSize);
+                col = Math.floor((rand ? rand() : Math.random()) * this.state.gridSize);
+                if (groupMap[row][col] === 0) break;
+                if (--maxAttempts <= 0) return groupMap;
+            }
+            const newGroup = {
+                groupId: groupId,
+                count: 1,
+                sum: 0,
+                row: row,
+                col: col,
+                multiRow: false,
+                multiCol: false,
+                map: JSON.parse(JSON.stringify(groupMap))
+            };
+            this.getColorGroupRecursive(rand, newGroup);
 
-                // Criteria for valid group
-                if (newGroup.count >= 3
-                    && newGroup.count <= this.state.gridSize
-                    && newGroup.multiRow && newGroup.multiCol
-                    && newGroup.sum > 0) {
-                        groupMap = newGroup.map;
-                        console.info(`Group ${groupId} generated with starting cell (${row}, ${col})`);
-                } else {
-                        console.warn(`Group ${groupId} discarded (count: ${newGroup.count}, multiRow: ${newGroup.multiRow}, multiCol: ${newGroup.multiCol}, sum: ${newGroup.sum})`);
-                }
+            // Criteria for valid group
+            if (newGroup.count >= 3
+                && newGroup.count <= this.state.gridSize
+                && newGroup.multiRow && newGroup.multiCol
+                && newGroup.sum > 0) {
+                    groupMap = newGroup.map;
+                    console.info(`Group ${groupId} generated with starting cell (${row}, ${col})`);
+            } else {
+                    console.warn(`Group ${groupId} discarded (count: ${newGroup.count}, multiRow: ${newGroup.multiRow}, multiCol: ${newGroup.multiCol}, sum: ${newGroup.sum})`);
             }
         }
 
