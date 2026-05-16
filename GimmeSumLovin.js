@@ -178,43 +178,83 @@ class Game {
     }
 
     wonGame = function() {
+        let special = 0;
         $('#win-popup').fadeIn(200);
 
         if (this.state.isDaily) {
             this.evaluateStreak(true);
         } else if (this.state.seed == this.settings.currentLevel) {
+            if (this.settings.currentLevel % 10 === 0) {
+                special = 1;
+            } else if (this.settings.currentLevel % 25 === 0) {
+                special = 2;
+            }
             this.settings.currentLevel += 1;
             this.saveSettings();
         }
 
-        this.showConfetti();
+        this.showWinningEffects(special);
     }
 
-    showConfetti = function() {
-        const $canvas = $('canvas.confetti-canvas');
+    showWinningEffects = function(special) {
+        const strip = function(ctx, c) {
+            ctx.beginPath();
+            ctx.lineWidth = c.r;
+            ctx.strokeStyle = c.color;
+            ctx.moveTo(c.x + c.tilt + c.r / 3, c.y);
+            ctx.lineTo(c.x + c.tilt, c.y + c.tilt + c.r / 5);
+            ctx.stroke();
+        };
+        const heart = function(ctx, c) {
+            ctx.beginPath();
+            ctx.fillStyle = c.color;
+            ctx.save();
+            ctx.translate(c.x, c.y);
+            ctx.rotate(c.tilt);
+            ctx.moveTo(0, 0);
+            ctx.quadraticCurveTo(-0.9 * c.r, -1.1 * c.r, 0, -0.7 * c.r);
+            ctx.quadraticCurveTo(0.9 * c.r, -1.1 * c.r, 0, 0);
+            ctx.lineTo(0, 0);
+            ctx.fill();
+            ctx.restore();
+        };
+        const greens = ['#81c784', '#00ff00', '#009900', '#00b055'];
+        const colors = ['#ffb300', '#ff5252', '#4fc3f7', '#81c784', '#ffd54f', '#f06292', '#fff176'];
 
-        const canvas = $canvas[0];
+        switch (special) {
+            case 1:
+                this.showConfetti(this.makeConfetti(150, colors), heart);
+                break;
+            case 2:
+                this.showConfetti(this.makeConfetti(200, greens), strip);
+                break;
+            default:
+                this.showConfetti(this.makeConfetti(100, colors), strip);
+        }
+    }
+
+    makeConfetti = function(count, colors) {
+        const confetti = [];
+
+        for (let i = 0; i < count; i++) {
+            confetti.push({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * -window.innerHeight,
+                r: Math.random() * 6 + 14,
+                d: Math.random() * count,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                tilt: Math.random() * 10 - 10,
+            });
+        }
+        return confetti;
+    }
+
+    showConfetti = function(confetti, drawFunc) {
+        const canvas = $('canvas.confetti-canvas')[0];
+
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         const ctx = canvas.getContext('2d');
-
-        // Confetti parameters
-        const confettiCount = 120;
-        const colors = ['#ffb300', '#ff5252', '#4fc3f7', '#81c784', '#ffd54f', '#f06292', '#fff176'];
-        const confetti = [];
-
-        for (let i = 0; i < confettiCount; i++) {
-            confetti.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * -canvas.height,
-                r: Math.random() * 6 + 14,
-                d: Math.random() * confettiCount,
-                color: colors[Math.floor(Math.random() * colors.length)],
-                tilt: Math.random() * 10 - 10,
-                tiltAngleIncremental: (Math.random() * 0.07) + .05,
-                tiltAngle: 0
-            });
-        }
 
         let angle = 0;
         let tiltAngle = 0;
@@ -222,21 +262,12 @@ class Game {
 
         function drawConfetti() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            angle += 0.01;
-            tiltAngle += 0.1;
 
             for (let i = 0; i < confetti.length; i++) {
                 let c = confetti[i];
-                c.tiltAngle += c.tiltAngleIncremental;
                 c.y += (Math.cos(angle + c.d) + 3 + c.r / 2) / 2;
-                c.tilt = Math.sin(c.tiltAngle - (i % 3)) * 15;
 
-                ctx.beginPath();
-                ctx.lineWidth = c.r;
-                ctx.strokeStyle = c.color;
-                ctx.moveTo(c.x + c.tilt + c.r / 3, c.y);
-                ctx.lineTo(c.x + c.tilt, c.y + c.tilt + c.r / 5);
-                ctx.stroke();
+                drawFunc(ctx, c);
             }
 
             animationFrame = requestAnimationFrame(drawConfetti);
