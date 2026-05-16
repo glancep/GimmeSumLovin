@@ -260,21 +260,12 @@ class Game {
         let tiltAngle = 0;
         let animationFrame;
 
-        let oldTime = 0, delta = 0;
         function drawConfetti(newTime) {
-            if (oldTime === 0) oldTime = newTime;
-            if (newTime - oldTime < delta) {
-                animationFrame = requestAnimationFrame(drawConfetti);
-                return;
-            }
-            oldTime = newTime;
-
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             for (let i = 0; i < confetti.length; i++) {
                 let c = confetti[i];
                 c.y += (Math.cos(angle + c.d) + 3 + c.r / 2) / 2;
-                if (i == 0) console.log(c.tilt);
 
                 drawFunc(ctx, c);
             }
@@ -286,7 +277,7 @@ class Game {
 
         setTimeout(() => {
             cancelAnimationFrame(animationFrame);
-        }, 100000);
+        }, 10000);
     }
 
     lostGame = function() {
