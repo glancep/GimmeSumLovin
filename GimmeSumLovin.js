@@ -1,4 +1,3 @@
-/*
 console = {};
 console.log = function(message) {
     const entry = document.createElement('div');
@@ -9,7 +8,6 @@ console.log = function(message) {
 console.warn = console.log;
 console.error = console.log;
 console.info = console.log;
-*/
 
 $(document).ready(function() {
     const game = new Game();
@@ -24,9 +22,9 @@ $(document).ready(function() {
 class Game {
     constructor() {
         this.$grid = $('#game-grid');
+        this.bindButtonEvents();
         this.loadSettings();
         this.loadState();
-        this.bindButtonEvents();
         console.log("Game initialized");
     }
 
@@ -102,30 +100,34 @@ class Game {
     }
 
     newGame = function(seed, isDaily) {
-        if (isDaily === true) seed = new Date().toLocaleDateString('en-CA');
+        try {
+            if (isDaily === true) seed = new Date().toLocaleDateString('en-CA');
 
-        this.loadSettings();
-        this.state = {
-            isDaily: isDaily === true,
-            seed: seed || this.getCurrentLevel(),
-            gridSize: parseInt(this.settings.gridSize),
-            pencilMode: false,
-            lives: 3,
-            maxLives: 3,
-        };
-        const rand = new alea(this.state.seed);
-        this.generateNumbers(rand);
-        this.generateDecoyMap(rand);
-        this.generateColorGroupMap(rand);
-        this.generateSolveMap();
-        this.generateSums(rand);
-        this.saveState();
+            this.loadSettings();
+            this.state = {
+                isDaily: isDaily === true,
+                seed: seed || this.getCurrentLevel(),
+                gridSize: parseInt(this.settings.gridSize),
+                pencilMode: false,
+                lives: 3,
+                maxLives: 3,
+            };
+            const rand = new alea(this.state.seed);
+            this.generateNumbers(rand);
+            this.generateDecoyMap(rand);
+            this.generateColorGroupMap(rand);
+            this.generateSolveMap();
+            this.generateSums(rand);
+            this.saveState();
 
-        this.togglePencilMode(this.state.pencilMode);
-        this.renderGrid();
-        this.updateLives();
+            this.togglePencilMode(this.state.pencilMode);
+            this.renderGrid();
+            this.updateLives();
 
-        $('#seed-input').val(this.state.seed);
+            $('#seed-input').val(this.state.seed);
+        } catch (error) {
+            console.error("Error starting new game:", error);
+        }
     }
 
     resetGame = function() {
