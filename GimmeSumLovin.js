@@ -11,12 +11,6 @@ console.info = console.log;
 
 $(document).ready(function() {
     const game = new Game();
-
-    $('#reset-btn').click(function() {
-        if (confirm("Are you sure you want to reset the game? This will clear your progress.")) {
-            game.newGame();
-        }
-    });
 });
 
 class Game {
@@ -75,17 +69,25 @@ class Game {
     }
 
     loadState = function() {
-        this.state = JSON.parse(localStorage.getItem('state'));
-        if (!this.state) {
-            console.log("No game state found, starting a new game.");
-            this.newGame();
-        } else {
-            console.log("Game state loaded from localStorage");
-            this.renderGrid();
-        }
+        try {
+            this.state = JSON.parse(localStorage.getItem('state'));
+            if (!this.state) {
+                console.log("No game state found, starting a new game.");
+                this.newGame();
+            } else {
+                console.log("Game state loaded from localStorage");
+                this.renderGrid();
+            }
 
-        this.togglePencilMode(this.state.pencilMode);
-        $('#seed-input').val(this.state.seed);
+            this.togglePencilMode(this.state.pencilMode);
+            $('#seed-input').val(this.state.seed);
+        } catch (error) {
+            console.error("Error loading game state:", error);
+            if (confirm('Error loading game state. Would you like to reset your progress? Click OK to reset, or Cancel to keep trying.')) {
+                localStorage.removeItem('state');
+                this.newGame();
+            }
+        }
     }
 
     saveState = function() {
@@ -300,7 +302,6 @@ class Game {
         }
         $('body').toggleClass('pencilMode', this.state.pencilMode);
         this.saveState();
-        console.info(`Mode: ${this.state.pencilMode ? 'Pencil' : 'Eraser'}`);
     }
 
 
