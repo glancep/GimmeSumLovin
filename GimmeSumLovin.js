@@ -314,6 +314,11 @@ class Game {
                 this.togglePencilMode();
             }
         });
+        $('#reset-btn').click(() => {
+            if (confirm("Are you sure you want to reset this game? This will clear your progress.")) {
+                this.newGame();
+            }
+        });
 
         // Win
         $('#close-win-btn').click(() => {
@@ -598,8 +603,8 @@ class Game {
     generateColorGroupMap = function(rand) {
         let groupMap = Array(this.state.gridSize).fill(null).map(() => Array(this.state.gridSize).fill(0));
 
-        let maxAttempts = this.state.gridSize * 5;
         for (let groupId = 1; groupId <= this.state.gridSize; groupId++) {
+            let maxAttempts = this.state.gridSize * 5;
             let row, col;
             while (true) {
                 row = Math.floor((rand ? rand() : Math.random()) * this.state.gridSize);
@@ -643,6 +648,7 @@ class Game {
             const direction = directions.pop();
             const newRow = newGroup.row + (direction[0]);
             const newCol = newGroup.col + (direction[1]);
+            console.info(`moving to (${newRow}, ${newCol}) in direction (${direction[0]}, ${direction[1]}) for group ${newGroup.groupId}`);
             if (newRow >= 0 && newRow < this.state.gridSize
                 && newCol >= 0 && newCol < this.state.gridSize
                 && newGroup.map[newRow][newCol] === 0) {
