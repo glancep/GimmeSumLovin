@@ -38,11 +38,16 @@ class Game {
         console.log("Game initialized");
     }
 
+    exportSettings = function() {
+        return JSON.stringify({
+            settings: this.settings,
+            state: this.state,
+        });
+    }
+
     loadSettings = function() {
         const DEFAULT_SETTINGS = {
-            staticGridSize: false,
             gridSize: 7,
-            staticDifficulty: false,
             difficulty: 5,
             showSums: true,
             showColorGroups: true,
@@ -65,14 +70,6 @@ class Game {
         $('#show-color-groups').prop('checked', this.settings.showColorGroups);
         $('body').toggleClass('disable-color-groups', !this.settings.showColorGroups);
         $('#inactive-cell-toggle-mode').prop('checked', this.settings.inactiveCellToggleMode);
-        $('#static-grid-size').prop('checked', this.settings.staticGridSize);
-        $('#static-grid-size-slider').val(this.settings.gridSize);
-        $('#static-grid-size-value').text(this.settings.gridSize);
-        $('#static-grid-size-lbl').toggle(this.settings.staticGridSize);
-        $('#static-difficulty').prop('checked', this.settings.staticDifficulty);
-        $('#static-difficulty-slider').val(this.settings.difficulty);
-        $('#static-difficulty-value').text(this.settings.difficulty);
-        $('#static-difficulty-lbl').toggle(this.settings.staticDifficulty);
         $('#theme-select').val(this.settings.theme);
         $('html').attr('data-theme', this.settings.theme);
 
@@ -361,6 +358,19 @@ class Game {
                 this.newGame(newSeed);
             }
         });
+        $('#export-settings-btn').click(() => {
+            const $btn = $('#export-settings-btn');
+            const dataStr = this.exportSettings();
+            navigator.clipboard.writeText(dataStr).then(() => {
+            $btn.text('Copied! ✅');
+                setTimeout(() => {
+                    $btn.text('Export');
+                }, 2000);
+            });
+        });
+        $('#import-settings-btn').click(() => {
+            
+        });
         $('#show-current-sums').change(() => {
             this.settings.showSums = $('#show-current-sums').is(':checked');
             this.saveSettings();
@@ -374,26 +384,6 @@ class Game {
         $('#inactive-cell-toggle-mode').change(() => {
             this.settings.inactiveCellToggleMode = $('#inactive-cell-toggle-mode').is(':checked');
             this.saveSettings();
-        });
-        $('#static-grid-size').change(() => {
-            this.settings.staticGridSize = $('#static-grid-size').is(':checked');
-            this.saveSettings();
-            $('#static-grid-size-lbl').toggle(this.settings.staticGridSize);
-        });
-        $('#static-grid-size-slider').on('input change', () => {
-            this.settings.gridSize = parseInt($('#static-grid-size-slider').val());
-            this.saveSettings();
-            $('#static-grid-size-value').text(this.settings.gridSize);
-        });
-        $('#static-difficulty').change(() => {
-            this.settings.staticDifficulty = $('#static-difficulty').is(':checked');
-            this.saveSettings();
-            $('#static-difficulty-lbl').toggle(this.settings.staticDifficulty);
-        });
-        $('#static-difficulty-slider').on('input change', () => {
-            this.settings.difficulty = parseInt($('#static-difficulty-slider').val());
-            this.saveSettings();
-            $('#static-difficulty-value').text(this.settings.difficulty);
         });
         $('#theme-select').change(() => {
             const theme = $('#theme-select').val();
