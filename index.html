@@ -82,10 +82,12 @@
     <button onclick="emergency();" class="btn">⚠️</button>
     <script>
         function emergency() {
+            const $console = $('#console');
+            $console.empty();
             const settings = localStorage.getItem('settings') || '{}';
-            $('#console').append(settings);
+            $console.append(settings);
             const state = localStorage.getItem('state') || '{}';
-            $('#console').append(state);
+            $console.append(state);
         }
     </script>
 </body>
