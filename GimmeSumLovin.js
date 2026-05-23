@@ -639,16 +639,27 @@ class Game {
         this.state.colorGroupMap = groupMap;
     }
 
+    shuffleArray = function(arr, rand) {
+        let currentIndex = arr.length;
+
+        // While there remain elements to shuffle...
+        while (currentIndex != 0) {
+
+            // Pick a remaining element...
+            let randomIndex = Math.floor((rand ? rand() : Math.random()) * currentIndex);
+            currentIndex--;
+
+            // And swap it with the current element.
+            [arr[currentIndex], arr[randomIndex]] = [arr[randomIndex], arr[currentIndex]];
+        }
+    }
+
     getColorGroupRecursive = function(rand, newGroup) {
         newGroup.map[newGroup.row][newGroup.col] = newGroup.groupId;
         if (newGroup.count >= this.state.gridSize) return true;
 
-        //let directions = [[-1, 0], [1, 0], [0, -1], [0, 1]].sort(() => (rand ? rand() : Math.random()) - 0.5 > 0 ? 1 : -1);
-        let directions = [[-1, 0], [1, 0], [0, -1], [0, 1]].sort(() => {
-            const r = (rand ? rand() : Math.random()) - 0.5;
-            console.info(`===== ${r} =====`);
-            return r > 0 ? 1 : -1;
-        });
+        let directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+        this.shuffleArray(directions, rand);
         console.info('Directions Sort:' + directions.map(d => `(${d[0]}, ${d[1]})`).join(', '));
         while (directions.length > 0) {
             const direction = directions.pop();
