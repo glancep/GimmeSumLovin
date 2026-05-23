@@ -23,13 +23,10 @@ class Game {
     }
 
     exportSettings = function() {
-        return JSON.stringify({
-            settings: this.settings,
-            state: this.state,
-        });
+        return JSON.stringify(this.settings);
     }
 
-    loadSettings = function() {
+    loadSettings = function(settingsStr) {
         const DEFAULT_SETTINGS = {
             gridSize: 7,
             difficulty: 5,
@@ -44,9 +41,10 @@ class Game {
             currentLevel: 1,
             theme: 'auto',
         };
-        const settings = JSON.parse(localStorage.getItem('settings') || '{}');
+        const storeSettings = JSON.parse(localStorage.getItem('settings') || '{}');
+        const importSettings = JSON.parse(settingsStr || '{}');
 
-        this.settings = { ...DEFAULT_SETTINGS, ...settings };
+        this.settings = { ...DEFAULT_SETTINGS, ...storeSettings, ...importSettings };
         this.saveSettings();
 
         $('#show-current-sums').prop('checked', this.settings.showSums);
@@ -82,7 +80,7 @@ class Game {
             this.togglePencilMode(this.state.pencilMode);
             $('#seed-input').val(this.state.seed);
         } catch (error) {
-            console.error("Error loading game state:", error);
+            console.error(`Error loading game state: ${error}`);
             if (confirm('Error loading game state. Would you like to reset your progress? Click OK to reset, or Cancel to keep trying.')) {
                 localStorage.removeItem('state');
                 this.newGame();
@@ -128,7 +126,7 @@ class Game {
 
             $('#seed-input').val(this.state.seed);
         } catch (error) {
-            console.error("Error starting new game:", error);
+            console.error(`Error starting new game: ${error}`);
         }
     }
 
@@ -362,14 +360,20 @@ class Game {
             const $btn = $('#export-settings-btn');
             const dataStr = this.exportSettings();
             navigator.clipboard.writeText(dataStr).then(() => {
-            $btn.text('Copied! ✅');
-                setTimeout(() => {
-                    $btn.text('Export');
-                }, 2000);
+                $btn.text('Copied! ✅');
+                setTimeout(() => $btn.text('Export'), 2000);
             });
         });
-        $('#import-settings-btn').click(() => {
-            
+        $('#import-settings-btn').click(async () => {
+            try {
+                const $btn = $('#import-settings-btn');
+                const settingsStr = await navigator.clipboard.readText();
+                this.loadSettings(settingsStr);
+                $btn.text('Imported! ✅');
+                setTimeout(() => $btn.text('Import'), 2000);
+            } catch (error) {
+                console.error(`Error importing settings: ${error}`);
+            }
         });
         $('#show-current-sums').change(() => {
             this.settings.showSums = $('#show-current-sums').is(':checked');
@@ -660,12 +664,10 @@ class Game {
 
         let directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
         this.shuffleArray(directions, rand);
-        console.info('Directions Sort:' + directions.map(d => `(${d[0]}, ${d[1]})`).join(', '));
         while (directions.length > 0) {
             const direction = directions.pop();
             const newRow = newGroup.row + (direction[0]);
             const newCol = newGroup.col + (direction[1]);
-            console.info(`moving to (${newRow}, ${newCol}) in direction (${direction[0]}, ${direction[1]}) for group ${newGroup.groupId}`);
             if (newRow >= 0 && newRow < this.state.gridSize
                 && newCol >= 0 && newCol < this.state.gridSize
                 && newGroup.map[newRow][newCol] === 0) {
