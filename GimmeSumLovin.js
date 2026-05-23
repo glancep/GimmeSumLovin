@@ -643,7 +643,12 @@ class Game {
         newGroup.map[newGroup.row][newGroup.col] = newGroup.groupId;
         if (newGroup.count >= this.state.gridSize) return true;
 
-        let directions = [[-1, 0], [1, 0], [0, -1], [0, 1]].sort(() => (rand ? rand() : Math.random()) - 0.5 > 0 ? 1 : -1);
+        //let directions = [[-1, 0], [1, 0], [0, -1], [0, 1]].sort(() => (rand ? rand() : Math.random()) - 0.5 > 0 ? 1 : -1);
+        let directions = [[-1, 0], [1, 0], [0, -1], [0, 1]].sort(() => {
+            const r = (rand ? rand() : Math.random()) - 0.5;
+            console.info(`===== ${r} =====`);
+            return r > 0 ? 1 : -1;
+        });
         console.info('Directions Sort:' + directions.map(d => `(${d[0]}, ${d[1]})`).join(', '));
         while (directions.length > 0) {
             const direction = directions.pop();
