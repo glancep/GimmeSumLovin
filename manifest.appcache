@@ -1,0 +1,7 @@
+CACHE MANIFEST
+# Version 1.0.0 (Change this comment to force a cache refresh)
+
+CACHE:
+# Files to cache for offline use
+index.html
+gimmesumlovin.js
